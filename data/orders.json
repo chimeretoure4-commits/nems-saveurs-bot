@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "id": "CMD-1786831398819",
+    "client": {
+      "name": null,
+      "phone": "test-2"
+    },
+    "items": [
+      {
+        "productKey": "nems_non_cuits",
+        "qty": 10,
+        "price": 2500
+      }
+    ],
+    "subtotal": 2500,
+    "deliveryType": "retrait",
+    "address": null,
+    "deliveryFee": null,
+    "total": 2500,
+    "status": "PRÊT POUR RETRAIT",
+    "createdAt": "2026-08-15T22:03:18.819Z"
+  }
+]

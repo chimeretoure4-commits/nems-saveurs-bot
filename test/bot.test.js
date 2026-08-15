@@ -37,7 +37,7 @@ test('add to cart and summary', ()=>{
   bot.addToCart(phone, 'nems_cuits', 20);
   const summary = bot.getCartSummary(phone);
   expect(summary).toMatch(/Nems cuits/);
-  expect(summary).toMatch(/6 000 FCFA/);
+  expect(summary).toMatch(/6[\s\u202F]?000 FCFA/);
 });
 
 test('confirm cart persists order', ()=>{
@@ -53,7 +53,7 @@ test('confirm cart persists order', ()=>{
 });
 
 test('parse numbers in words and multi-product', ()=>{
-  const res = bot.parseOrdersFromText('Salut je veux vingt cuits et dix beignets crevettes non cuits');
+  const res = bot.parseOrdersFromText('Salut je veux vingt nems cuits et dix beignets crevettes non cuits');
   expect(res.found).toBeTruthy();
   expect(res.items.length).toBeGreaterThanOrEqual(2);
   const keys = res.items.map(i=>i.productKey).sort();

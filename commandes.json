@@ -1,0 +1,23 @@
+[
+  {
+    "numeroCommande": "CMD-15082026-001-L",
+    "clientWhatsApp": "221777041494@s.whatsapp.net",
+    "produits": [
+      {
+        "nom": "Nems cuits",
+        "emoji": "🍽️",
+        "quantite": 5,
+        "prix": 1500
+      }
+    ],
+    "sousTotal": 1500,
+    "typeRecuperation": "livraison",
+    "adresse": "HLM-FASS",
+    "statut": "en_attente",
+    "date": "2026-08-15T21:56:43.974Z",
+    "promo": null,
+    "livreur": "Assishow",
+    "livreurTel": "221779789713",
+    "fraisLivraison": 1000
+  }
+]

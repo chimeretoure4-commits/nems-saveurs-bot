@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: nems-saveurs-bot
+    env: node
+    buildCommand: npm install
+    startCommand: node src/wa-connector.js
+    plan: free

@@ -125,9 +125,7 @@ function afficherPanier(userId) {
 }
 
 function afficherCatalogue() {
-  const stocks = chargerStocks();
-  let m = '📋 *NEMS SAVEURS - MENU OFFICIEL*\n';
-  m += '━━━━━━━━━━━━━━━━━━━━━\n\n';
+  let m = '📋 *NEMS SAVEURS - MENU OFFICIEL*\n━━━━━━━━━━━━━━━━━━━━━\n\n';
   m += '🥟 *NEMS NON CUITS*\n• 5 pcs ..... 1 250 FCFA\n• 10 pcs .... 2 500 FCFA\n• 15 pcs .... 3 750 FCFA\n• 20 pcs .... 5 000 FCFA\n• 25 pcs .... 6 250 FCFA\n• 30 pcs .... 7 500 FCFA\n• 40 pcs .... 10 000 FCFA\n• 45 pcs .... 11 250 FCFA\n• 50 pcs .... 12 500 FCFA\n\n';
   m += '🍽️ *NEMS CUITS*\n• 5 pcs ..... 1 500 FCFA\n• 10 pcs .... 3 000 FCFA\n• 15 pcs .... 4 500 FCFA\n• 20 pcs .... 6 000 FCFA\n• 25 pcs .... 7 500 FCFA\n• 30 pcs .... 9 000 FCFA\n• 35 pcs .... 10 500 FCFA\n• 40 pcs .... 12 000 FCFA\n• 45 pcs .... 13 500 FCFA\n• 50 pcs .... 15 000 FCFA\n\n';
   m += '🍤 *BEIGNETS CREVETTES*\n(Cuits ou non cuits - même prix)\n• 5 pcs ..... 1 750 FCFA\n• 10 pcs .... 3 500 FCFA\n• 15 pcs .... 5 250 FCFA\n• 20 pcs .... 7 000 FCFA\n• 25 pcs .... 8 750 FCFA\n• 30 pcs .... 10 500 FCFA\n• 35 pcs .... 12 250 FCFA\n• 40 pcs .... 14 000 FCFA\n• 45 pcs .... 15 750 FCFA\n• 50 pcs .... 17 500 FCFA\n\n';
@@ -186,7 +184,7 @@ function demarrerRelancePanier(userId) {
     if (panier.length > 0 && getEtat(userId) === ETATS.PANIER) {
       if (sockGlobal) {
         try {
-          await sockGlobal.sendMessage(userId, { text: '🛒 *VOTRE PANIER VOUS ATTEND !*\n━━━━━━━━━━━━━━━━━\n\nVous avez des articles dans votre panier.\n\n' + afficherPanier(userId) + '\n\n📌 *OPTIONS*\n1️⃣ Confirmer\n2️⃣ Ajouter\n3️⃣ Vider' });
+          await sockGlobal.sendMessage(userId, { text: '🛒 *VOTRE PANIER VOUS ATTEND !*\n━━━━━━━━━━━━━━━━━\n\n' + afficherPanier(userId) + '\n\n1️⃣ Confirmer\n2️⃣ Ajouter\n3️⃣ Vider' });
         } catch (e) {}
       }
     }
@@ -199,7 +197,7 @@ function demarrerSuiviCommande(userId, numeroCommande) {
   setTimeout(async () => {
     if (sockGlobal) {
       try {
-        await sockGlobal.sendMessage(userId, { text: '📋 *SUIVI DE VOTRE COMMANDE*\n━━━━━━━━━━━━━━━━━\n\n🔖 N° : *' + numeroCommande + '*\n\n✅ Votre commande a bien été reçue.\nNotre équipe la prépare avec soin 🥟❤️\n\n📞 Besoin d\'aide ? Tapez *equipe*' });
+        await sockGlobal.sendMessage(userId, { text: '📋 *SUIVI DE VOTRE COMMANDE*\n━━━━━━━━━━━━━━━━━\n\n🔖 N° : *' + numeroCommande + '*\n\n✅ Votre commande a bien été reçue.\nNotre équipe la prépare avec soin 🥟❤️' });
       } catch (e) {}
     }
   }, 2 * 60 * 1000);
@@ -211,21 +209,21 @@ async function traiterMessage(userId, texte) {
 
   if (t.includes('equipe') || t.includes('parler') || t.includes('assistante')) {
     setEtat(userId, ETATS.ACCUEIL);
-    return '📞 *ASSISTANCE*\n━━━━━━━━━━━━━━━━━\n\nJe vous mets en relation avec notre équipe 👩‍💼\nQuelqu\'un va vous répondre très rapidement.\n\nMerci de votre patience ❤️';
+    return '📞 *ASSISTANCE*\n━━━━━━━━━━━━━━━━━\n\nJe vous mets en relation avec notre équipe 👩‍💼\nQuelqu\'un va vous répondre très rapidement.';
   }
 
   const promoMatch = PROMOTIONS.find(p => t.includes(p.code.toLowerCase()));
   if (promoMatch) {
     promoEnCours.set(userId, promoMatch);
     setEtat(userId, ETATS.ACCUEIL);
-    return `🎁 *PROMOTION ACTIVÉE !*\n━━━━━━━━━━━━━━━━━\n\n✅ Code *${promoMatch.code}* appliqué : ${promoMatch.description}\n\nContinuez votre commande !\n\n💡 Tapez "menu" pour voir le catalogue.`;
+    return `🎁 *PROMOTION ACTIVÉE !*\n\n✅ Code *${promoMatch.code}* : ${promoMatch.description}\n\nContinuez votre commande !`;
   }
 
   switch(etat) {
     case ETATS.LIVRAISON:
       if (t.includes('livraison') || texte === '1') {
         setEtat(userId, ETATS.ADRESSE);
-        return '🚚 *LIVRAISON*\n━━━━━━━━━━━━━━━━━\n\nParfait ! 👍\n\nMerci de nous envoyer votre *adresse complète* de livraison 📍';
+        return '🚚 *LIVRAISON*\n\nMerci de nous envoyer votre *adresse complète* 📍';
       }
       if (t.includes('retrait') || t.includes('recuperer') || texte === '2') {
         const produits = getPanier(userId).map(item => {
@@ -236,34 +234,18 @@ async function traiterMessage(userId, texte) {
         const promo = promoEnCours.get(userId);
         if (promo) sousTotal = sousTotal - (sousTotal * promo.reduction / 100);
         
-        // Décrémenter les stocks
-        const stocks = chargerStocks();
-        produits.forEach(p => {
-          const key = Object.keys(CATALOG).find(k => CATALOG[k].nom === p.nom);
-          if (key) stocks[key] = Math.max(0, (stocks[key] || 100) - p.quantite);
-        });
-        sauvegarderStocks(stocks);
-        
-        const cmd = { numeroCommande: genererNumeroCommande('retrait'), clientWhatsApp: userId, produits, sousTotal: Math.round(sousTotal), typeRecuperation: 'retrait', adresse: '', statut: 'en_attente', date: new Date().toISOString(), promo: promo ? promo.code : null, livreur: null };
+        const cmd = { numeroCommande: genererNumeroCommande('retrait'), clientWhatsApp: userId, produits, sousTotal: Math.round(sousTotal), typeRecuperation: 'retrait', adresse: '', statut: 'en_attente', date: new Date().toISOString(), promo: promo ? promo.code : null, livreur: null, fraisLivraison: null };
         sauvegarderCommande(cmd);
         const clients = enregistrerClient(userId);
         clients[userId].totalDepense += Math.round(sousTotal);
         sauvegarderClients(clients);
         promoEnCours.delete(userId);
         paniers.delete(userId);
-        if (panierTimers.has(userId)) { clearTimeout(panierTimers.get(userId)); panierTimers.delete(userId); }
         setEtat(userId, ETATS.ACCUEIL);
-        
-        if (sockGlobal) {
-          try {
-            await sockGlobal.sendMessage('221776886486@s.whatsapp.net', { text: `🔔 *NOUVELLE COMMANDE (RETRAIT)*\n\n📋 ${cmd.numeroCommande}\n👤 ${userId}\n\n${produits.map((p, i) => `${i + 1}. ${p.emoji} ${p.nom} × ${p.quantite} = ${p.prix} FCFA`).join('\n')}\n\n💰 Total : ${Math.round(sousTotal)} FCFA${promo ? `\n🎁 Promo : ${promo.code}` : ''}\n📍 Retrait : HLM FASS` });
-          } catch (e) {}
-        }
-        
         demarrerSuiviCommande(userId, cmd.numeroCommande);
-        return `✅ *COMMANDE CONFIRMÉE !*\n━━━━━━━━━━━━━━━━━\n\n🔖 N° : *${cmd.numeroCommande}*\n\n📍 Point de retrait : *HLM FASS*\n\nNous vous confirmerons quand votre commande sera prête ❤️`;
+        return `✅ *COMMANDE CONFIRMÉE !*\n\n🔖 N° : *${cmd.numeroCommande}*\n\n📍 Retrait : HLM FASS\n\nNous vous confirmerons quand c'est prêt ❤️`;
       }
-      return '📌 *MODE DE RÉCUPÉRATION*\n━━━━━━━━━━━━━━━━━\n\n1️⃣ 🚚 Livraison\n2️⃣ 📍 Retrait (HLM FASS)';
+      return '📌 *MODE DE RÉCUPÉRATION*\n1️⃣ 🚚 Livraison\n2️⃣ 📍 Retrait';
 
     case ETATS.ADRESSE:
       const produits = getPanier(userId).map(item => {
@@ -273,142 +255,85 @@ async function traiterMessage(userId, texte) {
       let sousTotal = produits.reduce((s, p) => s + p.prix, 0);
       const promo = promoEnCours.get(userId);
       if (promo) sousTotal = sousTotal - (sousTotal * promo.reduction / 100);
-      
-      // Décrémenter les stocks
-      const stocks = chargerStocks();
-      produits.forEach(p => {
-        const key = Object.keys(CATALOG).find(k => CATALOG[k].nom === p.nom);
-        if (key) stocks[key] = Math.max(0, (stocks[key] || 100) - p.quantite);
-      });
-      sauvegarderStocks(stocks);
-      
       const livreur = assignerLivreur(texte);
       const frais = chargerFrais();
       
-      const cmd = { numeroCommande: genererNumeroCommande('livraison'), clientWhatsApp: userId, produits, sousTotal: Math.round(sousTotal), typeRecuperation: 'livraison', adresse: texte, statut: 'en_attente', date: new Date().toISOString(), promo: promo ? promo.code : null, livreur: livreur ? livreur.nom : null, livreurTel: livreur ? livreur.telephone : null, fraisLivraison: frais.montant };
+      const cmd = { numeroCommande: genererNumeroCommande('livraison'), clientWhatsApp: userId, produits, sousTotal: Math.round(sousTotal), typeRecuperation: 'livraison', adresse: texte, statut: 'en_attente', date: new Date().toISOString(), promo: promo ? promo.code : null, livreur: livreur ? livreur.nom : null, fraisLivraison: frais.montant };
       sauvegarderCommande(cmd);
       const clients = enregistrerClient(userId);
       clients[userId].totalDepense += Math.round(sousTotal);
       sauvegarderClients(clients);
       promoEnCours.delete(userId);
       paniers.delete(userId);
-      if (panierTimers.has(userId)) { clearTimeout(panierTimers.get(userId)); panierTimers.delete(userId); }
       setEtat(userId, ETATS.ACCUEIL);
-      
-      if (sockGlobal) {
-        try {
-          await sockGlobal.sendMessage('221776886486@s.whatsapp.net', { text: `🔔 *NOUVELLE COMMANDE (LIVRAISON)*\n\n📋 ${cmd.numeroCommande}\n👤 ${userId}\n\n${produits.map((p, i) => `${i + 1}. ${p.emoji} ${p.nom} × ${p.quantite} = ${p.prix} FCFA`).join('\n')}\n\n💰 Total : ${Math.round(sousTotal)} FCFA\n🚚 Livraison : ${frais.montant} FCFA\n💰 Total Final : ${Math.round(sousTotal) + frais.montant} FCFA${promo ? `\n🎁 Promo : ${promo.code}` : ''}\n📍 Adresse : ${texte}\n🚚 Livreur : ${livreur ? livreur.nom : 'Non assigné'}` });
-        } catch (e) {}
-      }
       
       if (livreur && sockGlobal) {
         try {
-          await sockGlobal.sendMessage(livreur.telephone + '@s.whatsapp.net', { 
-            text: `🚚 *NOUVELLE LIVRAISON ASSIGNÉE*\n━━━━━━━━━━━━━━━━━\n\n📋 Commande : *${cmd.numeroCommande}*\n👤 Client : ${userId}\n\n🛒 Produits :\n${produits.map((p, i) => `${i + 1}. ${p.emoji} ${p.nom} × ${p.quantite}`).join('\n')}\n\n💰 Total : ${Math.round(sousTotal)} FCFA\n🚚 Livraison : ${frais.montant} FCFA\n📍 Adresse : ${texte}\n\n📌 Répondez *OK* pour confirmer la prise en charge`
-          });
-          console.log(`🚚 Livreur ${livreur.nom} notifié`);
+          await sockGlobal.sendMessage(livreur.telephone + '@s.whatsapp.net', { text: `🚚 *NOUVELLE LIVRAISON*\n\n📋 ${cmd.numeroCommande}\n📍 ${texte}\n🛒 ${produits.map(p => `${p.emoji} ${p.nom} ×${p.quantite}`).join(', ')}\n💰 ${Math.round(sousTotal)} FCFA` });
         } catch (e) {}
       }
       
       demarrerSuiviCommande(userId, cmd.numeroCommande);
-      
-      return `✅ *COMMANDE ENREGISTRÉE !*\n━━━━━━━━━━━━━━━━━\n\n🔖 N° : *${cmd.numeroCommande}*\n\n📍 Livraison : ${texte}\n${livreur ? `🚚 Livreur : *${livreur.nom}*` : ''}\n🚚 Frais : *${frais.montant} FCFA*\n\nNotre assistante vous contactera pour confirmer 👩‍💼`;
+      return `✅ *COMMANDE ENREGISTRÉE !*\n\n🔖 N° : *${cmd.numeroCommande}*\n\n📍 ${texte}\n${livreur ? `🚚 Livreur : *${livreur.nom}*` : ''}\n🚚 Frais : *${frais.montant} FCFA*`;
 
     case ETATS.PANIER:
       if (t.includes('confirmer') || t.includes('valider') || t === 'oui' || texte === '1') {
-        if (panierTimers.has(userId)) { clearTimeout(panierTimers.get(userId)); panierTimers.delete(userId); }
         setEtat(userId, ETATS.LIVRAISON);
-        return afficherPanier(userId) + '\n\n📌 *MODE DE RÉCUPÉRATION*\n1️⃣ 🚚 Livraison\n2️⃣ 📍 Retrait';
+        return afficherPanier(userId) + '\n\n1️⃣ 🚚 Livraison\n2️⃣ 📍 Retrait';
       }
       if (t.includes('annuler') || t.includes('vider')) {
         paniers.delete(userId);
-        if (panierTimers.has(userId)) { clearTimeout(panierTimers.get(userId)); panierTimers.delete(userId); }
         setEtat(userId, ETATS.ACCUEIL);
-        return '🗑️ Panier vidé.\n\nTapez *menu* pour voir le catalogue.';
+        return '🗑️ Panier vidé. Tapez *menu* pour voir le catalogue.';
       }
       {
         const cmds = parserCommande(texte);
         if (cmds.length > 0) {
-          let rep = '✅ *AJOUTÉ AU PANIER*\n━━━━━━━━━━━━━━━━━\n\n';
+          let rep = '✅ *AJOUTÉ AU PANIER*\n\n';
           cmds.forEach(c => {
-            const resultat = ajouterAuPanier(userId, c.produitKey, c.quantite);
-            if (resultat.success) {
-              const p = CATALOG[c.produitKey];
-              rep += `${p.emoji} ${p.nom} × ${c.quantite}\n`;
-            } else {
-              rep += resultat.message + '\n';
-            }
+            const r = ajouterAuPanier(userId, c.produitKey, c.quantite);
+            if (r.success) rep += `${CATALOG[c.produitKey].emoji} ${CATALOG[c.produitKey].nom} × ${c.quantite}\n`;
+            else rep += r.message + '\n';
           });
-          rep += '\n' + afficherPanier(userId) + '\n\n📌 *OPTIONS*\n1️⃣ Confirmer\n2️⃣ Ajouter autre produit\n3️⃣ Vider le panier';
+          rep += '\n' + afficherPanier(userId) + '\n\n1️⃣ Confirmer\n2️⃣ Ajouter\n3️⃣ Vider';
           demarrerRelancePanier(userId);
           return rep;
         }
       }
-      return '❓ Confirmer, ajouter ou vider le panier ?';
+      return 'Confirmer, ajouter ou vider le panier ?';
 
     default:
       if (t.includes('bonjour') || t.includes('salut') || t.includes('bonsoir')) {
-        const accueilMsg = '👋 *BIENVENUE CHER(E) CLIENT(E)*\n' +
-          '━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-          '🥟 *NEMS SAVEURS*\n' +
-          'Votre goût authentique du nems\n' +
-          '100% asiatique\n\n' +
-          '📦 *VENTE EN LIGNE*\n' +
-          '🚚 *LIVRAISON PARTOUT*\n\n' +
-          '📍 *DAKAR - HLM FASS*\n' +
-          '📞 *TÉL : +221 77 688 64 86*\n\n' +
-          '━━━━━━━━━━━━━━━━━━━━━━\n\n' +
-          '📌 *VEUILLEZ CHOISIR UNE OPTION :*\n\n' +
-          '1️⃣ 📋 Consulter le Menu\n' +
-          '2️⃣ 🛒 Passer une Commande\n' +
-          '3️⃣ 📞 Parler à notre Équipe\n\n' +
-          '💡 *Répondez simplement par 1, 2 ou 3*';
-        await sockGlobal.sendMessage(userId, { text: accueilMsg });
+        await sockGlobal.sendMessage(userId, { text: '👋 *BIENVENUE CHER(E) CLIENT(E)*\n━━━━━━━━━━━━━━━━━━━━━━\n\n🥟 *NEMS SAVEURS*\nVotre goût authentique du nems 100% asiatique\n\n📌 *OPTIONS :*\n1️⃣ 📋 Consulter le Menu\n2️⃣ 🛒 Passer une Commande\n3️⃣ 📞 Parler à notre Équipe\n\n💡 Répondez par 1, 2 ou 3' });
         return null;
       }
-      if (t.includes('menu') || t.includes('catalogue')) {
-        const imagesDir = path.resolve(__dirname, '..', 'data');
-        const photosMenu = ['menu1.jpg.jpeg', 'menu2.jpg.jpeg'];
-        for (const photo of photosMenu) {
-          const photoPath = path.join(imagesDir, photo);
-          if (fs.existsSync(photoPath)) {
-            try { await sockGlobal.sendMessage(userId, { image: fs.readFileSync(photoPath), caption: '📋 *NEMS SAVEURS - MENU*' }); } catch (e) {}
-          }
-        }
-        return afficherCatalogue();
-      }
+      if (t.includes('menu') || t.includes('catalogue')) return afficherCatalogue();
       if (t.includes('commande') || t.includes('commander')) {
         setEtat(userId, ETATS.PANIER);
-        return '🛒 *PASSER UNE COMMANDE*\n━━━━━━━━━━━━━━━━━\n\n' + afficherCatalogue();
+        return '🛒 *PASSER UNE COMMANDE*\n\n' + afficherCatalogue();
       }
       {
         const cmds = parserCommande(texte);
         if (cmds.length > 0) {
           setEtat(userId, ETATS.PANIER);
-          let rep = '✅ *COMMANDE REÇUE*\n━━━━━━━━━━━━━━━━━\n\n';
+          let rep = '✅ *COMMANDE REÇUE*\n\n';
           cmds.forEach(c => {
-            const resultat = ajouterAuPanier(userId, c.produitKey, c.quantite);
-            if (resultat.success) {
-              const p = CATALOG[c.produitKey];
-              rep += `${p.emoji} ${p.nom} × ${c.quantite}\n`;
-            } else {
-              rep += resultat.message + '\n';
-            }
+            const r = ajouterAuPanier(userId, c.produitKey, c.quantite);
+            if (r.success) rep += `${CATALOG[c.produitKey].emoji} ${CATALOG[c.produitKey].nom} × ${c.quantite}\n`;
+            else rep += r.message + '\n';
           });
-          rep += '\n' + afficherPanier(userId) + '\n\n📌 *OPTIONS*\n1️⃣ Confirmer\n2️⃣ Ajouter\n3️⃣ Vider';
+          rep += '\n' + afficherPanier(userId) + '\n\n1️⃣ Confirmer\n2️⃣ Ajouter\n3️⃣ Vider';
           demarrerRelancePanier(userId);
           return rep;
         }
       }
-      return '❓ *Je n\'ai pas compris*\n━━━━━━━━━━━━━━━━━\n\n1️⃣ 📋 *Menu* → Tapez "menu"\n2️⃣ 🛒 *Commander* → Ex : "20 nems cuits"\n3️⃣ 📞 *Assistance* → Tapez "equipe"\n\nJe reste à votre disposition 😊';
+      return '❓ *Je n\'ai pas compris*\n\n1️⃣ Menu → "menu"\n2️⃣ Commander → "20 nems cuits"\n3️⃣ Assistance → "equipe"';
   }
 }
 
 // ============ DASHBOARD ============
 function nettoyerNumero(jid) {
-  let numero = jid;
-  if (numero.endsWith('@lid')) numero = numero.replace('@lid', '@s.whatsapp.net');
-  const chiffres = numero.replace(/[^0-9]/g, '');
+  const chiffres = jid.replace(/[^0-9]/g, '');
   if (chiffres.length >= 9) return `+${chiffres.slice(0, 3)} ${chiffres.slice(3, 5)} ${chiffres.slice(5, 8)} ${chiffres.slice(8, 10)} ${chiffres.slice(10)}`;
   return jid;
 }
@@ -416,18 +341,16 @@ function nettoyerNumero(jid) {
 const http = require('http');
 function demarrerServeurWeb() {
   const server = http.createServer((req, res) => {
-    // ============ PAGE DE CONNEXION ============
     if (req.url === '/login' || req.url === '/login?erreur=1') {
       if (req.method === 'POST') {
         let body = '';
-        req.on('data', chunk => { body += chunk; });
+        req.on('data', c => { body += c; });
         req.on('end', () => {
           const params = new URLSearchParams(body);
-          const password = params.get('password');
-          if (password === ADMIN_PASSWORD) {
-            const sessionId = genererSessionId();
-            sessions.set(sessionId, true);
-            res.writeHead(302, { 'Location': '/', 'Set-Cookie': `session=${sessionId}; HttpOnly; Path=/` });
+          if (params.get('password') === ADMIN_PASSWORD) {
+            const sid = genererSessionId();
+            sessions.set(sid, true);
+            res.writeHead(302, { 'Location': '/', 'Set-Cookie': `session=${sid}; HttpOnly; Path=/` });
             res.end();
           } else {
             res.writeHead(302, { 'Location': '/login?erreur=1' });
@@ -437,68 +360,21 @@ function demarrerServeurWeb() {
         return;
       }
       let html = '<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Connexion Admin</title>';
-      html += '<style>*{box-sizing:border-box}body{font-family:sans-serif;background:#f5f5f5;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}.login-box{background:white;border-radius:15px;padding:30px;box-shadow:0 5px 20px rgba(0,0,0,0.1);width:100%;max-width:400px}.login-box h1{margin:0 0 10px;font-size:24px;color:#e63946;text-align:center}.login-box p{margin:0 0 20px;font-size:14px;color:#666;text-align:center}.login-box input{width:100%;padding:15px;border:1px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:15px}.login-box button{width:100%;padding:15px;background:#e63946;color:white;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer}.erreur{background:#ffebee;color:#c62828;padding:10px;border-radius:5px;margin-bottom:15px;font-size:14px;text-align:center}</style>';
-      html += '</head><body><div class="login-box"><h1>🔐 Admin Nems Saveurs</h1><p>Entrez votre mot de passe</p>';
-      if (req.url.includes('erreur=1')) html += '<div class="erreur">❌ Mot de passe incorrect !</div>';
+      html += '<style>body{font-family:sans-serif;background:#f5f5f5;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}.login-box{background:white;border-radius:15px;padding:30px;box-shadow:0 5px 20px rgba(0,0,0,0.1);width:100%;max-width:400px;text-align:center}.login-box input{width:100%;padding:15px;border:1px solid #ddd;border-radius:8px;font-size:16px;margin-bottom:15px}.login-box button{width:100%;padding:15px;background:#e63946;color:white;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer}</style></head><body>';
+      html += '<div class="login-box"><h1>🔐 Admin Nems Saveurs</h1><p>Entrez votre mot de passe</p>';
+      if (req.url.includes('erreur=1')) html += '<p style="color:red">❌ Mot de passe incorrect !</p>';
       html += '<form method="POST" action="/login"><input type="password" name="password" placeholder="Mot de passe" required><button type="submit">Se connecter</button></form></div></body></html>';
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(html);
       return;
     }
 
-    // ============ VÉRIFIER SESSION POUR TOUTES LES AUTRES ROUTES ============
-    if (!verifierSession(req) && req.url !== '/login') {
+    if (!verifierSession(req)) {
       res.writeHead(302, { 'Location': '/login' });
       res.end();
       return;
     }
 
-    if (req.url.startsWith('/changer-statut')) {
-      const url = new URL(req.url, 'http://localhost');
-      const cmd = url.searchParams.get('cmd');
-      const statut = url.searchParams.get('statut');
-      if (cmd && statut) {
-        let cmds = [];
-        if (fs.existsSync(COMMANDES_FILE)) cmds = JSON.parse(fs.readFileSync(COMMANDES_FILE, 'utf8'));
-        const idx = cmds.findIndex(c => c.numeroCommande === cmd);
-        if (idx !== -1) { cmds[idx].statut = statut; fs.writeFileSync(COMMANDES_FILE, JSON.stringify(cmds, null, 2)); }
-      }
-      res.writeHead(302, { 'Location': '/' });
-      res.end();
-      return;
-    }
-    if (req.url.startsWith('/supprimer')) {
-      const url = new URL(req.url, 'http://localhost');
-      const cmd = url.searchParams.get('cmd');
-      if (cmd) {
-        let cmds = [];
-        if (fs.existsSync(COMMANDES_FILE)) cmds = JSON.parse(fs.readFileSync(COMMANDES_FILE, 'utf8'));
-        cmds = cmds.filter(c => c.numeroCommande !== cmd);
-        fs.writeFileSync(COMMANDES_FILE, JSON.stringify(cmds, null, 2));
-      }
-      res.writeHead(302, { 'Location': '/' });
-      res.end();
-      return;
-    }
-    if (req.url === '/nettoyer-tout') {
-      fs.writeFileSync(COMMANDES_FILE, JSON.stringify([], null, 2));
-      res.writeHead(302, { 'Location': '/' });
-      res.end();
-      return;
-    }
-    if (req.url === '/export-csv') {
-      let cmds = [];
-      if (fs.existsSync(COMMANDES_FILE)) cmds = JSON.parse(fs.readFileSync(COMMANDES_FILE, 'utf8'));
-      let csv = 'Numero;Date;Client;Type;Produits;Total;Adresse;Statut;Promo;Livreur;FraisLivraison\n';
-      cmds.forEach(cmd => {
-        const produitsStr = cmd.produits.map(p => `${p.nom} x${p.quantite}`).join(' | ');
-        const client = nettoyerNumero(cmd.clientWhatsApp).replace(/;/g, '');
-        csv += `${cmd.numeroCommande};${new Date(cmd.date).toLocaleString('fr-FR')};${client};${cmd.typeRecuperation};"${produitsStr}";${cmd.sousTotal};"${cmd.adresse}";${cmd.statut};${cmd.promo || ''};${cmd.livreur || ''};${cmd.fraisLivraison || ''}\n`;
-      });
-      res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': 'attachment; filename=commandes.csv' });
-      res.end(csv);
-      return;
-    }
     if (req.url === '/commandes') {
       let cmds = [];
       if (fs.existsSync(COMMANDES_FILE)) cmds = JSON.parse(fs.readFileSync(COMMANDES_FILE, 'utf8'));
@@ -506,113 +382,52 @@ function demarrerServeurWeb() {
       res.end(JSON.stringify(cmds, null, 2));
       return;
     }
-    if (req.url === '/clients') {
-      const clients = chargerClients();
-      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify(clients, null, 2));
-      return;
-    }
-    if (req.url === '/livreurs') {
-      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify(LIVREURS, null, 2));
-      return;
-    }
     if (req.url === '/stocks') {
-      const stocks = chargerStocks();
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify(stocks, null, 2));
+      res.end(JSON.stringify(chargerStocks(), null, 2));
       return;
     }
     if (req.url === '/frais') {
-      const frais = chargerFrais();
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify(frais, null, 2));
+      res.end(JSON.stringify(chargerFrais(), null, 2));
       return;
     }
-    if (req.url.startsWith('/modifier-frais')) {
-      const url = new URL(req.url, 'http://localhost');
-      const montant = parseInt(url.searchParams.get('montant'));
-      if (montant && montant > 0) {
-        sauvegarderFrais({ montant });
-      }
-      res.writeHead(302, { 'Location': '/' });
-      res.end();
-      return;
-    }
-    if (req.url.startsWith('/modifier-stock')) {
-      const url = new URL(req.url, 'http://localhost');
-      const produit = url.searchParams.get('produit');
-      const quantite = parseInt(url.searchParams.get('quantite'));
-      if (produit && quantite >= 0) {
-        const stocks = chargerStocks();
-        stocks[produit] = quantite;
-        sauvegarderStocks(stocks);
-      }
-      res.writeHead(302, { 'Location': '/' });
-      res.end();
+    if (req.url === '/clients') {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(chargerClients(), null, 2));
       return;
     }
     if (req.url === '/' || req.url.startsWith('/?filtre=')) {
       const url = new URL(req.url, 'http://localhost');
       const filtre = url.searchParams.get('filtre') || 'toutes';
-      const recherche = url.searchParams.get('recherche') || '';
       let cmds = [];
       if (fs.existsSync(COMMANDES_FILE)) cmds = JSON.parse(fs.readFileSync(COMMANDES_FILE, 'utf8'));
       if (filtre === 'livraison') cmds = cmds.filter(c => c.typeRecuperation === 'livraison');
       if (filtre === 'retrait') cmds = cmds.filter(c => c.typeRecuperation === 'retrait');
       if (filtre === 'en_attente') cmds = cmds.filter(c => c.statut === 'en_attente');
-      if (filtre === 'prete') cmds = cmds.filter(c => c.statut === 'prete');
-      if (filtre === 'livree') cmds = cmds.filter(c => c.statut === 'livree');
-      if (recherche) cmds = cmds.filter(c => c.numeroCommande.toLowerCase().includes(recherche.toLowerCase()) || c.clientWhatsApp.toLowerCase().includes(recherche.toLowerCase()) || c.adresse.toLowerCase().includes(recherche.toLowerCase()));
       
-      const totalCommandes = cmds.length;
-      const totalRevenus = cmds.reduce((s, c) => s + c.sousTotal, 0);
-      const livraisons = cmds.filter(c => c.typeRecuperation === 'livraison').length;
-      const retraits = cmds.filter(c => c.typeRecuperation === 'retrait').length;
-      const enAttente = cmds.filter(c => c.statut === 'en_attente').length;
-      const clients = chargerClients();
-      const totalClients = Object.keys(clients).length;
+      const total = cmds.length;
+      const revenus = cmds.reduce((s, c) => s + c.sousTotal, 0);
       const frais = chargerFrais();
       const stocks = chargerStocks();
       
-      let html = '<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nems Saveurs - Dashboard</title>';
-      html += '<style>*{box-sizing:border-box}body{font-family:sans-serif;padding:15px;background:#f5f5f5;margin:0}.header{background:#e63946;color:white;padding:20px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}.header h1{margin:0;font-size:20px}.header-btns{display:flex;gap:8px;flex-wrap:wrap}.btn{background:white;color:#e63946;padding:10px 15px;border-radius:5px;text-decoration:none;font-weight:bold;font-size:14px}.search{margin-bottom:15px}.search input{width:100%;padding:12px;border-radius:8px;border:1px solid #ddd;font-size:16px}.stats{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}.stat-card{background:white;border-radius:10px;padding:15px;flex:1;min-width:130px;box-shadow:0 2px 5px rgba(0,0,0,0.1);text-align:center}.stat-card h3{margin:0;font-size:13px;color:#666}.stat-card p{margin:5px 0 0;font-size:22px;font-weight:bold;color:#e63946}.filtres{margin-bottom:20px;display:flex;gap:8px;flex-wrap:wrap}.filtre{background:white;padding:8px 15px;border-radius:20px;text-decoration:none;color:#333;font-size:13px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}.filtre.active{background:#e63946;color:white}.c{background:white;border-radius:10px;padding:15px;margin:10px 0;box-shadow:0 2px 5px rgba(0,0,0,0.1)}.c-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px;flex-wrap:wrap;gap:10px}.c-header h2{margin:0;font-size:15px}.badges{display:flex;gap:5px;flex-wrap:wrap}.statut-livraison{background:#e76f51;color:white;padding:5px 10px;border-radius:15px;font-size:11px;font-weight:bold}.statut-retrait{background:#264653;color:white;padding:5px 10px;border-radius:15px;font-size:11px;font-weight:bold}.statut-en_attente{background:#f4a261;color:white;padding:5px 10px;border-radius:15px;font-size:11px;font-weight:bold}.statut-prete{background:#2a9d8f;color:white;padding:5px 10px;border-radius:15px;font-size:11px;font-weight:bold}.statut-livree{background:#6c757d;color:white;padding:5px 10px;border-radius:15px;font-size:11px;font-weight:bold}.c-body p{margin:5px 0;font-size:14px}.produits{margin:10px 0;padding:10px;background:#f9f9f9;border-radius:5px}.produits li{margin:3px 0;font-size:13px}.total{font-size:17px;font-weight:bold;color:#e63946;text-align:right}.adresse{background:#fff3cd;padding:10px;border-radius:5px;margin:5px 0;font-size:13px}.actions{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}.action-btn{padding:8px 12px;border-radius:15px;font-size:12px;text-decoration:none;font-weight:bold;color:white}.btn-prete{background:#2a9d8f}.btn-livree{background:#6c757d}.btn-supprimer{background:#dc3545}.btn-attente{background:#f4a261}@media(max-width:600px){.stat-card{min-width:45%}}</style>';
-      html += '<meta http-equiv="refresh" content="30"></head><body>';
-      html += '<div class="header"><div><h1>📋 Dashboard Admin - Nems Saveurs</h1><p style="margin:5px 0 0;font-size:13px">Auto-refresh 30s</p></div><div class="header-btns"><a href="/export-csv" class="btn">📥 CSV</a><a href="/nettoyer-tout" class="btn" onclick="return confirm(\'Tout supprimer ?\')">🧹 Nettoyer</a></div></div>';
-      html += '<div class="search"><form action="/" method="get"><input type="text" name="recherche" placeholder="🔍 Rechercher..." value="' + recherche + '"></form></div>';
-      html += `<div class="stats"><div class="stat-card"><h3>📦 Total</h3><p>${totalCommandes}</p></div><div class="stat-card"><h3>💰 Revenus</h3><p>${totalRevenus.toLocaleString('fr-FR')} FCFA</p></div><div class="stat-card"><h3>👥 Clients</h3><p>${totalClients}</p></div><div class="stat-card"><h3>🚚 Livraisons</h3><p>${livraisons}</p></div><div class="stat-card"><h3>📍 Retraits</h3><p>${retraits}</p></div><div class="stat-card"><h3>⏳ En Attente</h3><p>${enAttente}</p></div></div>`;
-      
-      // Frais de livraison et stocks
-      html += '<div style="display:flex;gap:15px;flex-wrap:wrap;margin-bottom:20px">';
-      html += '<div style="background:white;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1)"><h3 style="margin:0 0 10px">🚚 Frais de livraison</h3><form action="/modifier-frais" method="get" style="display:flex;gap:5px"><input type="number" name="montant" value="' + frais.montant + '" style="padding:8px;border:1px solid #ddd;border-radius:5px;width:120px"><button type="submit" style="padding:8px 15px;background:#e63946;color:white;border:none;border-radius:5px;cursor:pointer">Modifier</button></form></div>';
-      html += '<div style="background:white;border-radius:10px;padding:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1)"><h3 style="margin:0 0 10px">📦 Stocks</h3><ul style="list-style:none;padding:0;margin:0">';
-      Object.keys(stocks).forEach(k => {
-        const nom = CATALOG[k] ? CATALOG[k].nom : k;
-        html += `<li style="margin:5px 0;font-size:13px">${CATALOG[k].emoji} ${nom} : <strong>${stocks[k]}</strong></li>`;
-      });
+      let html = '<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Dashboard Nems Saveurs</title>';
+      html += '<style>*{box-sizing:border-box}body{font-family:sans-serif;padding:15px;background:#f5f5f5;margin:0}.header{background:#e63946;color:white;padding:20px;border-radius:10px;margin-bottom:20px}.stats{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}.stat-card{background:white;border-radius:10px;padding:15px;flex:1;min-width:130px;text-align:center;box-shadow:0 2px 5px rgba(0,0,0,0.1)}.stat-card p{font-size:22px;font-weight:bold;color:#e63946;margin:5px 0 0}.c{background:white;border-radius:10px;padding:15px;margin:10px 0;box-shadow:0 2px 5px rgba(0,0,0,0.1)}</style></head><body>';
+      html += '<div class="header"><h1>📋 Dashboard Admin - Nems Saveurs</h1></div>';
+      html += `<div class="stats"><div class="stat-card"><h3>📦 Total</h3><p>${total}</p></div><div class="stat-card"><h3>💰 Revenus</h3><p>${revenus.toLocaleString('fr-FR')} FCFA</p></div><div class="stat-card"><h3>🚚 Frais</h3><p>${frais.montant} FCFA</p></div></div>`;
+      html += '<div style="background:white;border-radius:10px;padding:15px;margin-bottom:20px"><h3>📦 Stocks</h3><ul>';
+      Object.keys(stocks).forEach(k => { html += `<li>${CATALOG[k].emoji} ${CATALOG[k].nom} : <strong>${stocks[k]}</strong></li>`; });
       html += '</ul></div>';
-      html += '</div>';
       
-      html += `<div class="filtres"><a href="/" class="filtre ${filtre==='toutes'?'active':''}">📋 Toutes</a><a href="/?filtre=livraison" class="filtre ${filtre==='livraison'?'active':''}">🚚 Livraisons</a><a href="/?filtre=retrait" class="filtre ${filtre==='retrait'?'active':''}">📍 Retraits</a><a href="/?filtre=en_attente" class="filtre ${filtre==='en_attente'?'active':''}">⏳ En Attente</a><a href="/?filtre=prete" class="filtre ${filtre==='prete'?'active':''}">✅ Prêtes</a><a href="/?filtre=livree" class="filtre ${filtre==='livree'?'active':''}">📦 Livrées</a></div>`;
-      
-      if (cmds.length === 0) html += '<p style="text-align:center;font-size:18px;color:#666">Aucune commande.</p>';
+      if (cmds.length === 0) html += '<p style="text-align:center;color:#666">Aucune commande.</p>';
       else {
         cmds.slice().reverse().forEach(cmd => {
-          const sc = cmd.typeRecuperation === 'livraison' ? 'statut-livraison' : 'statut-retrait';
-          const si = cmd.typeRecuperation === 'livraison' ? '🚚' : '📍';
-          const sbc = 'statut-' + cmd.statut;
-          const cn = nettoyerNumero(cmd.clientWhatsApp);
-          html += `<div class="c"><div class="c-header"><h2>📋 ${cmd.numeroCommande}</h2><div class="badges"><span class="${sc}">${si} ${cmd.typeRecuperation.toUpperCase()}</span><span class="${sbc}">${cmd.statut.replace(/_/g,' ').toUpperCase()}</span>${cmd.promo?`<span class="statut-prete">🎁 ${cmd.promo}</span>`:''}${cmd.livreur?`<span class="statut-retrait">🚚 ${cmd.livreur}</span>`:''}</div></div>`;
-          html += `<div class="c-body"><p><strong>👤 Client :</strong> ${cn}</p><p><strong>📅 Date :</strong> ${new Date(cmd.date).toLocaleString('fr-FR')}</p><div class="produits"><strong>🛒 Produits :</strong><ul>`;
-          cmd.produits.forEach(p => { html += `<li>${p.emoji} ${p.nom} × ${p.quantite} = ${p.prix.toLocaleString('fr-FR')} FCFA</li>`; });
-          html += `</ul></div><p class="total">💰 Total : ${cmd.sousTotal.toLocaleString('fr-FR')} FCFA${cmd.fraisLivraison ? ` + ${cmd.fraisLivraison} FCFA livraison` : ''}</p>`;
-          if (cmd.typeRecuperation === 'livraison') html += `<div class="adresse"><strong>📍 Adresse :</strong> ${cmd.adresse}${cmd.livreur ? `<br><strong>🚚 Livreur :</strong> ${cmd.livreur}` : ''}${cmd.fraisLivraison ? `<br><strong>💰 Frais :</strong> ${cmd.fraisLivraison} FCFA` : ''}</div>`;
-          else html += '<div class="adresse"><strong>📍 Retrait :</strong> HLM FASS</div>';
-          html += '<div class="actions">';
-          if (cmd.statut === 'en_attente') html += `<a href="/changer-statut?cmd=${encodeURIComponent(cmd.numeroCommande)}&statut=prete" class="action-btn btn-prete">✅ Prête</a>`;
-          if (cmd.statut === 'prete') html += `<a href="/changer-statut?cmd=${encodeURIComponent(cmd.numeroCommande)}&statut=livree" class="action-btn btn-livree">📦 Livrée</a>`;
-          if (cmd.statut === 'livree') html += `<a href="/changer-statut?cmd=${encodeURIComponent(cmd.numeroCommande)}&statut=en_attente" class="action-btn btn-attente">⏳ Réactiver</a>`;
-          html += `<a href="/supprimer?cmd=${encodeURIComponent(cmd.numeroCommande)}" class="action-btn btn-supprimer" onclick="return confirm(\'Supprimer ?\')">🗑️ Supprimer</a></div></div></div>`;
+          html += `<div class="c"><h2>📋 ${cmd.numeroCommande} - ${cmd.statut.toUpperCase()}</h2><p>👤 ${nettoyerNumero(cmd.clientWhatsApp)}</p><p>📅 ${new Date(cmd.date).toLocaleString('fr-FR')}</p><ul>`;
+          cmd.produits.forEach(p => { html += `<li>${p.emoji} ${p.nom} × ${p.quantite} = ${p.prix} FCFA</li>`; });
+          html += `</ul><p><strong>Total : ${cmd.sousTotal} FCFA</strong></p>`;
+          if (cmd.typeRecuperation === 'livraison') html += `<p>📍 ${cmd.adresse}${cmd.livreur ? ` - 🚚 ${cmd.livreur}` : ''}</p>`;
+          else html += '<p>📍 Retrait HLM FASS</p>';
+          html += '</div>';
         });
       }
       html += '</body></html>';
@@ -625,18 +440,15 @@ function demarrerServeurWeb() {
   server.listen(3000, '0.0.0.0', () => {
     console.log('🖥️ Dashboard PC : http://localhost:3000');
     console.log('🔐 Mot de passe : nems2026');
-    const os = require('os');
-    const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)) {
-      for (const iface of interfaces[name]) {
-        if (iface.family === 'IPv4' && !iface.internal) console.log(`📱 Dashboard Téléphone : http://${iface.address}:3000`);
-      }
-    }
   });
 }
 
 async function startConnector(){
   const authDir = path.resolve(__dirname, '..', 'auth_info');
+  if (process.env.FORCE_NEW_SESSION === 'true') {
+    if (fs.existsSync(authDir)) fs.rmSync(authDir, { recursive: true, force: true });
+    console.log('🗑️ Ancienne session supprimée (FORCE_NEW_SESSION)');
+  }
   if(!fs.existsSync(authDir)) fs.mkdirSync(authDir, { recursive: true });
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
   const { version } = await fetchLatestBaileysVersion();

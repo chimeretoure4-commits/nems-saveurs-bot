@@ -3,7 +3,6 @@ const fs = require('fs');
 const qrcode = require('qrcode');
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 
-// ============ AUTHENTIFICATION ADMIN ============
 const ADMIN_PASSWORD = 'nems2026';
 const sessions = new Map();
 function verifierSession(req) {
@@ -15,7 +14,6 @@ function genererSessionId() {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
 
-// ============ FRAIS DE LIVRAISON ============
 const FRAIS_FILE = path.resolve(__dirname, '..', 'frais.json');
 function chargerFrais() {
   try { if (fs.existsSync(FRAIS_FILE)) return JSON.parse(fs.readFileSync(FRAIS_FILE, 'utf8')); } catch (e) {}
@@ -25,7 +23,6 @@ function sauvegarderFrais(frais) {
   try { fs.writeFileSync(FRAIS_FILE, JSON.stringify(frais, null, 2)); } catch (e) {}
 }
 
-// ============ STOCKS ============
 const STOCKS_FILE = path.resolve(__dirname, '..', 'stocks.json');
 function chargerStocks() {
   try { if (fs.existsSync(STOCKS_FILE)) return JSON.parse(fs.readFileSync(STOCKS_FILE, 'utf8')); } catch (e) {}
@@ -53,7 +50,7 @@ const LIVREURS = [
 ];
 
 let compteurLivreur = 0;
-function assignerLivreur(adresse) {
+function assignerLivreur() {
   const actifs = LIVREURS.filter(l => l.actif);
   if (actifs.length === 0) return null;
   compteurLivreur++;
@@ -181,12 +178,10 @@ function demarrerRelancePanier(userId) {
   if (panierTimers.has(userId)) clearTimeout(panierTimers.get(userId));
   const timer = setTimeout(async () => {
     const panier = getPanier(userId);
-    if (panier.length > 0 && getEtat(userId) === ETATS.PANIER) {
-      if (sockGlobal) {
-        try {
-          await sockGlobal.sendMessage(userId, { text: '🛒 *VOTRE PANIER VOUS ATTEND !*\n\n' + afficherPanier(userId) + '\n\n1️⃣ Confirmer\n2️⃣ Ajouter\n3️⃣ Vider' });
-        } catch (e) {}
-      }
+    if (panier.length > 0 && sockGlobal) {
+      try {
+        await sockGlobal.sendMessage(userId, { text: '🛒 *VOTRE PANIER VOUS ATTEND !*\n\n' + afficherPanier(userId) + '\n\n1️⃣ Confirmer\n2️⃣ Ajouter\n3️⃣ Vider' });
+      } catch (e) {}
     }
     panierTimers.delete(userId);
   }, 5 * 60 * 1000);
@@ -254,7 +249,7 @@ async function traiterMessage(userId, texte) {
       let sousTotal = produits.reduce((s, p) => s + p.prix, 0);
       const promo = promoEnCours.get(userId);
       if (promo) sousTotal = sousTotal - (sousTotal * promo.reduction / 100);
-      const livreur = assignerLivreur(texte);
+      const livreur = assignerLivreur();
       const frais = chargerFrais();
       const cmd = { numeroCommande: genererNumeroCommande('livraison'), clientWhatsApp: userId, produits, sousTotal: Math.round(sousTotal), typeRecuperation: 'livraison', adresse: texte, statut: 'en_attente', date: new Date().toISOString(), promo: promo ? promo.code : null, livreur: livreur ? livreur.nom : null, fraisLivraison: frais.montant };
       sauvegarderCommande(cmd);
@@ -327,7 +322,6 @@ async function traiterMessage(userId, texte) {
   }
 }
 
-// ============ DASHBOARD ============
 function nettoyerNumero(jid) {
   const chiffres = jid.replace(/[^0-9]/g, '');
   if (chiffres.length >= 9) return `+${chiffres.slice(0, 3)} ${chiffres.slice(3, 5)} ${chiffres.slice(5, 8)} ${chiffres.slice(8, 10)} ${chiffres.slice(10)}`;
@@ -337,7 +331,6 @@ function nettoyerNumero(jid) {
 const http = require('http');
 function demarrerServeurWeb() {
   const server = http.createServer((req, res) => {
-    // ============ QR CODE ACCESSIBLE ============
     if (req.url === '/qr-code.png') {
       const qrFile = path.resolve(__dirname, '..', 'qr-code.png');
       const dataFile = path.resolve(__dirname, '..', 'data', 'wa-qr.png');
@@ -450,8 +443,7 @@ function demarrerServeurWeb() {
     res.writeHead(404); res.end('404');
   });
   server.listen(3000, '0.0.0.0', () => {
-    console.log('🖥️ Dashboard PC : http://localhost:3000');
-    console.log('🔐 Mot de passe : nems2026');
+    console.log('🖥️ Dashboard : http://localhost:3000');
   });
 }
 
@@ -501,7 +493,7 @@ async function startConnector(){
       await qrcode.toFile(qrFile, qr, { type: 'png', scale: 8, width: 400 });
       console.log('QR accessible : /qr-code.png');
     }
-    if(connection === 'open'){ console.log('✅ WhatsApp connecté !'); demarrerServeurWeb(); }
+    if(connection === 'open'){ console.log('✅ WhatsApp connecté !'); }
     if(connection === 'close'){
       const statusCode = (lastDisconnect && lastDisconnect.error && lastDisconnect.error.output) ? lastDisconnect.error.output.statusCode : null;
       console.log('Fermé, code:', statusCode);
@@ -510,8 +502,18 @@ async function startConnector(){
   });
 }
 
+// ============ DÉMARRAGE SÉPARÉ ============
 if(require.main === module){
-  startConnector().catch(err => { console.error('Erreur fatale:', err.message); process.exit(1); });
+  // Démarrer le serveur web indépendamment
+  try {
+    demarrerServeurWeb();
+    console.log('🖥️ Serveur web démarré sur le port 3000');
+  } catch (e) {
+    console.error('Erreur serveur web:', e.message);
+  }
+  
+  // Démarrer WhatsApp séparément
+  startConnector().catch(err => { console.error('Erreur WhatsApp:', err.message); });
 }
 
 module.exports = { startConnector, traiterMessage, afficherPanier };

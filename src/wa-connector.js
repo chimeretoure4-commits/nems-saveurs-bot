@@ -101,7 +101,7 @@ function getQuantitesValides(produitKey) { const p = CATALOG[produitKey]; return
 
 function ajouterAuPanier(userId, k, q) {
   const prix = getPrix(k, q);
-  if (!prix) return { success: false, message: `❌ Quantité ${q} non disponible pour ${CATALOG[k].nom}.\nQuantités valides : ${getQuantitesValides(k).join(', ')}` };
+  if (!prix) return { success: false, message: `❌ Quantité ${q} non disponible pour ${CATALOG[k].nom}. Quantités : ${getQuantitesValides(k).join(', ')}` };
   const panier = getPanier(userId);
   const found = panier.find(i => i.produitKey === k);
   if (found) found.quantite += q;
@@ -184,7 +184,7 @@ function demarrerRelancePanier(userId) {
     if (panier.length > 0 && getEtat(userId) === ETATS.PANIER) {
       if (sockGlobal) {
         try {
-          await sockGlobal.sendMessage(userId, { text: '🛒 *VOTRE PANIER VOUS ATTEND !*\n━━━━━━━━━━━━━━━━━\n\n' + afficherPanier(userId) + '\n\n1️⃣ Confirmer\n2️⃣ Ajouter\n3️⃣ Vider' });
+          await sockGlobal.sendMessage(userId, { text: '🛒 *VOTRE PANIER VOUS ATTEND !*\n\n' + afficherPanier(userId) + '\n\n1️⃣ Confirmer\n2️⃣ Ajouter\n3️⃣ Vider' });
         } catch (e) {}
       }
     }
@@ -197,7 +197,7 @@ function demarrerSuiviCommande(userId, numeroCommande) {
   setTimeout(async () => {
     if (sockGlobal) {
       try {
-        await sockGlobal.sendMessage(userId, { text: '📋 *SUIVI DE VOTRE COMMANDE*\n━━━━━━━━━━━━━━━━━\n\n🔖 N° : *' + numeroCommande + '*\n\n✅ Votre commande a bien été reçue.\nNotre équipe la prépare avec soin 🥟❤️' });
+        await sockGlobal.sendMessage(userId, { text: '📋 *SUIVI DE VOTRE COMMANDE*\n\n🔖 N° : *' + numeroCommande + '*\n\n✅ Votre commande a bien été reçue.' });
       } catch (e) {}
     }
   }, 2 * 60 * 1000);
@@ -209,14 +209,14 @@ async function traiterMessage(userId, texte) {
 
   if (t.includes('equipe') || t.includes('parler') || t.includes('assistante')) {
     setEtat(userId, ETATS.ACCUEIL);
-    return '📞 *ASSISTANCE*\n━━━━━━━━━━━━━━━━━\n\nJe vous mets en relation avec notre équipe 👩‍💼\nQuelqu\'un va vous répondre très rapidement.';
+    return '📞 *ASSISTANCE*\n\nJe vous mets en relation avec notre équipe 👩‍💼';
   }
 
   const promoMatch = PROMOTIONS.find(p => t.includes(p.code.toLowerCase()));
   if (promoMatch) {
     promoEnCours.set(userId, promoMatch);
     setEtat(userId, ETATS.ACCUEIL);
-    return `🎁 *PROMOTION ACTIVÉE !*\n\n✅ Code *${promoMatch.code}* : ${promoMatch.description}\n\nContinuez votre commande !`;
+    return `🎁 *PROMOTION ACTIVÉE !*\n\n✅ Code *${promoMatch.code}* : ${promoMatch.description}`;
   }
 
   switch(etat) {
@@ -233,7 +233,6 @@ async function traiterMessage(userId, texte) {
         let sousTotal = produits.reduce((s, p) => s + p.prix, 0);
         const promo = promoEnCours.get(userId);
         if (promo) sousTotal = sousTotal - (sousTotal * promo.reduction / 100);
-        
         const cmd = { numeroCommande: genererNumeroCommande('retrait'), clientWhatsApp: userId, produits, sousTotal: Math.round(sousTotal), typeRecuperation: 'retrait', adresse: '', statut: 'en_attente', date: new Date().toISOString(), promo: promo ? promo.code : null, livreur: null, fraisLivraison: null };
         sauvegarderCommande(cmd);
         const clients = enregistrerClient(userId);
@@ -243,7 +242,7 @@ async function traiterMessage(userId, texte) {
         paniers.delete(userId);
         setEtat(userId, ETATS.ACCUEIL);
         demarrerSuiviCommande(userId, cmd.numeroCommande);
-        return `✅ *COMMANDE CONFIRMÉE !*\n\n🔖 N° : *${cmd.numeroCommande}*\n\n📍 Retrait : HLM FASS\n\nNous vous confirmerons quand c'est prêt ❤️`;
+        return `✅ *COMMANDE CONFIRMÉE !*\n\n🔖 N° : *${cmd.numeroCommande}*\n\n📍 Retrait : HLM FASS`;
       }
       return '📌 *MODE DE RÉCUPÉRATION*\n1️⃣ 🚚 Livraison\n2️⃣ 📍 Retrait';
 
@@ -257,7 +256,6 @@ async function traiterMessage(userId, texte) {
       if (promo) sousTotal = sousTotal - (sousTotal * promo.reduction / 100);
       const livreur = assignerLivreur(texte);
       const frais = chargerFrais();
-      
       const cmd = { numeroCommande: genererNumeroCommande('livraison'), clientWhatsApp: userId, produits, sousTotal: Math.round(sousTotal), typeRecuperation: 'livraison', adresse: texte, statut: 'en_attente', date: new Date().toISOString(), promo: promo ? promo.code : null, livreur: livreur ? livreur.nom : null, fraisLivraison: frais.montant };
       sauvegarderCommande(cmd);
       const clients = enregistrerClient(userId);
@@ -266,13 +264,11 @@ async function traiterMessage(userId, texte) {
       promoEnCours.delete(userId);
       paniers.delete(userId);
       setEtat(userId, ETATS.ACCUEIL);
-      
       if (livreur && sockGlobal) {
         try {
           await sockGlobal.sendMessage(livreur.telephone + '@s.whatsapp.net', { text: `🚚 *NOUVELLE LIVRAISON*\n\n📋 ${cmd.numeroCommande}\n📍 ${texte}\n🛒 ${produits.map(p => `${p.emoji} ${p.nom} ×${p.quantite}`).join(', ')}\n💰 ${Math.round(sousTotal)} FCFA` });
         } catch (e) {}
       }
-      
       demarrerSuiviCommande(userId, cmd.numeroCommande);
       return `✅ *COMMANDE ENREGISTRÉE !*\n\n🔖 N° : *${cmd.numeroCommande}*\n\n📍 ${texte}\n${livreur ? `🚚 Livreur : *${livreur.nom}*` : ''}\n🚚 Frais : *${frais.montant} FCFA*`;
 
@@ -284,7 +280,7 @@ async function traiterMessage(userId, texte) {
       if (t.includes('annuler') || t.includes('vider')) {
         paniers.delete(userId);
         setEtat(userId, ETATS.ACCUEIL);
-        return '🗑️ Panier vidé. Tapez *menu* pour voir le catalogue.';
+        return '🗑️ Panier vidé. Tapez *menu*.';
       }
       {
         const cmds = parserCommande(texte);
@@ -300,11 +296,11 @@ async function traiterMessage(userId, texte) {
           return rep;
         }
       }
-      return 'Confirmer, ajouter ou vider le panier ?';
+      return 'Confirmer, ajouter ou vider ?';
 
     default:
       if (t.includes('bonjour') || t.includes('salut') || t.includes('bonsoir')) {
-        await sockGlobal.sendMessage(userId, { text: '👋 *BIENVENUE CHER(E) CLIENT(E)*\n━━━━━━━━━━━━━━━━━━━━━━\n\n🥟 *NEMS SAVEURS*\nVotre goût authentique du nems 100% asiatique\n\n📌 *OPTIONS :*\n1️⃣ 📋 Consulter le Menu\n2️⃣ 🛒 Passer une Commande\n3️⃣ 📞 Parler à notre Équipe\n\n💡 Répondez par 1, 2 ou 3' });
+        await sockGlobal.sendMessage(userId, { text: '👋 *BIENVENUE CHER(E) CLIENT(E)*\n━━━━━━━━━━━━━━━━━━━━━━\n\n🥟 *NEMS SAVEURS*\nVotre goût authentique du nems 100% asiatique\n\n📌 *OPTIONS :*\n1️⃣ 📋 Consulter le Menu\n2️⃣ 🛒 Passer une Commande\n3️⃣ 📞 Parler à notre Équipe' });
         return null;
       }
       if (t.includes('menu') || t.includes('catalogue')) return afficherCatalogue();
@@ -341,6 +337,22 @@ function nettoyerNumero(jid) {
 const http = require('http');
 function demarrerServeurWeb() {
   const server = http.createServer((req, res) => {
+    // ============ QR CODE ACCESSIBLE ============
+    if (req.url === '/qr-code.png') {
+      const qrFile = path.resolve(__dirname, '..', 'qr-code.png');
+      const dataFile = path.resolve(__dirname, '..', 'data', 'wa-qr.png');
+      if (fs.existsSync(qrFile)) {
+        res.writeHead(200, { 'Content-Type': 'image/png' });
+        res.end(fs.readFileSync(qrFile));
+      } else if (fs.existsSync(dataFile)) {
+        res.writeHead(200, { 'Content-Type': 'image/png' });
+        res.end(fs.readFileSync(dataFile));
+      } else {
+        res.writeHead(404); res.end('QR code non disponible');
+      }
+      return;
+    }
+
     if (req.url === '/login' || req.url === '/login?erreur=1') {
       if (req.method === 'POST') {
         let body = '';
@@ -447,7 +459,7 @@ async function startConnector(){
   const authDir = path.resolve(__dirname, '..', 'auth_info');
   if (process.env.FORCE_NEW_SESSION === 'true') {
     if (fs.existsSync(authDir)) fs.rmSync(authDir, { recursive: true, force: true });
-    console.log('🗑️ Ancienne session supprimée (FORCE_NEW_SESSION)');
+    console.log('🗑️ Ancienne session supprimée');
   }
   if(!fs.existsSync(authDir)) fs.mkdirSync(authDir, { recursive: true });
   const { state, saveCreds } = await useMultiFileAuthState(authDir);
@@ -485,13 +497,15 @@ async function startConnector(){
       qrcode.toString(qr, { type: 'terminal', small: true }, (err, url) => { if(!err) console.log(url); });
       const out = path.resolve(__dirname, '..', 'data', 'wa-qr.png');
       await qrcode.toFile(out, qr, { type: 'png', scale: 6 });
-      console.log('QR saved:', out);
+      const qrFile = path.resolve(__dirname, '..', 'qr-code.png');
+      await qrcode.toFile(qrFile, qr, { type: 'png', scale: 8, width: 400 });
+      console.log('QR accessible : /qr-code.png');
     }
     if(connection === 'open'){ console.log('✅ WhatsApp connecté !'); demarrerServeurWeb(); }
     if(connection === 'close'){
       const statusCode = (lastDisconnect && lastDisconnect.error && lastDisconnect.error.output) ? lastDisconnect.error.output.statusCode : null;
       console.log('Fermé, code:', statusCode);
-      if(statusCode === DisconnectReason.loggedOut){ fs.rmSync(authDir, { recursive: true, force: true }); console.log('Session supprimée. Relancez.'); }
+      if(statusCode === DisconnectReason.loggedOut){ fs.rmSync(authDir, { recursive: true, force: true }); console.log('Session supprimée.'); }
     }
   });
 }
